@@ -36,21 +36,13 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnRecord.setOnClickListener {
-            if (isRecording) {
-                isPaused = !isPaused
-                if (isPaused) {
-                    pauseRecorder()
-                    btnRecord.setImageResource(R.drawable.ic_record)
-                } else {
-                    resumeRecorder()
-                    btnRecord.setImageResource(R.drawable.ic_pause)
-                }
-            } else {
-                //isRecording = true
-                startRecording()
-                btnRecord.setImageResource(R.drawable.ic_pause)
+            when {
+                isPaused -> resumeRecorder()
+                isRecording -> pauseRecorder()
+                else -> startRecording()
             }
         }
+
     }
 
     override fun onRequestPermissionsResult(
@@ -76,7 +68,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun startRecording() {
-        if (permissionGranted) {
+        if (!permissionGranted) {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE)
             return
         }
