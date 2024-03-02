@@ -12,17 +12,25 @@
         android:layout_height="wrap_content"
         android:text="00:00.00"
         android:textSize="56sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/waveformView"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        android:layout_marginBottom="30dp"/>
+
+    <com.example.dictophone_vorobyevp.WaveformView
+        android:id="@+id/waveformView"
+        android:layout_width="match_parent"
+        android:layout_height="400px"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <LinearLayout
+        android:id="@+id/linearLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="80dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_marginBottom="80dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
 
@@ -53,12 +61,11 @@
 
         <ImageButton
             android:id="@+id/btnDone"
-            android:visibility="gone"
             android:layout_width="@dimen/btn_size"
             android:layout_height="@dimen/btn_size"
+            android:background="@drawable/ic_ripple"
             android:src="@drawable/ic_done"
-            android:background="@drawable/ic_ripple">
-        </ImageButton>
+            android:visibility="gone"></ImageButton>
     </LinearLayout>
 
 
