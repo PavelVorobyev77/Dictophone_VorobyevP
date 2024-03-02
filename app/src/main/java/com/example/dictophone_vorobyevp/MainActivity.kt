@@ -8,19 +8,26 @@ import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.view.View
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import java.io.File
 import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Date
 
 const val REQUEST_CODE = 200
 class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
+    private lateinit var amplitudes: ArrayList<Float>
     private var permissions = arrayOf(Manifest.permission.RECORD_AUDIO)
     private var permissionGranted = false
     private lateinit var btnRecord: ImageButton
+    private lateinit var btnList: ImageButton
+    private lateinit var btnDone: ImageButton
+    private lateinit var btnDelete: ImageButton
     private lateinit var tvTimer: TextView
     private lateinit var recorder: MediaRecorder
     private lateinit var waveformView: WaveformView
@@ -38,6 +45,9 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         setContentView(R.layout.activity_main)
 
         btnRecord = findViewById(R.id.btnRecord)
+        btnList= findViewById(R.id.btnList)
+        btnDone= findViewById(R.id.btnDone)
+        btnDelete= findViewById(R.id.btnDelete)
 
         tvTimer = findViewById(R.id.tvTimer)
 
@@ -60,6 +70,25 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
             }
             vibrator.vibrate(VibrationEffect.createOneShot(50,VibrationEffect.DEFAULT_AMPLITUDE))
         }
+
+        btnList.setOnClickListener{
+            //...
+            Toast.makeText(this, "Это список", Toast.LENGTH_SHORT).show()
+        }
+
+        btnDone.setOnClickListener{
+            stopRecorder()
+            //...
+            Toast.makeText(this, "Запись сохранена", Toast.LENGTH_SHORT).show()
+        }
+
+        btnDelete.setOnClickListener{
+            stopRecorder()
+            File("$dirPath$filename.mp3")
+            Toast.makeText(this, "Запись удалена", Toast.LENGTH_SHORT).show()
+        }
+
+        btnDelete.isClickable = false
     }
 
     override fun onRequestPermissionsResult(
@@ -119,10 +148,35 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
 
         timer.start()
 
+        btnDelete.isClickable = true
+        btnDelete.setImageResource(R.drawable.ic_delete)
+
+        btnList.visibility = View.GONE
+        btnDone.visibility = View.VISIBLE
+
     }
 
     private fun stopRecorder(){
         timer.stop()
+        recorder.apply{
+            stop()
+            release()
+        }
+
+        isPaused = false
+        isRecording = false
+
+        btnList.visibility = View.VISIBLE
+        btnDone.visibility = View.GONE
+
+        btnDelete.isClickable = false
+        btnDelete.setImageResource(R.drawable.ic_delete_disabled)
+
+        btnRecord.setImageResource(R.drawable.ic_record)
+
+        tvTimer.text = "00:00.00"
+
+        amplitudes = waveformView.clear()
     }
 
     override fun onTimerTick(duration: String) {

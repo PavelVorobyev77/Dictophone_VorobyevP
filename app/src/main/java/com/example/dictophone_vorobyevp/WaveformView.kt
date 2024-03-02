@@ -20,24 +20,44 @@ class WaveformView(context: Context?, attrs: AttributeSet?) : View(context, attr
 
     private var sw = 0f //ширина экрана
     private var sh = 400f //высота экрана
+    private var d = 6f
+    private var maxSpikes = 0
 
     init{
         paint.color = Color.rgb(244, 81, 30)
 
         sw = resources.displayMetrics.widthPixels.toFloat()
+
+        maxSpikes = (sw / (w+d)).toInt()
     }
 
+
     fun addAmplitude(amp:Float){
-        amplitudes.add(amp)
+        var norm = Math.min(amp.toInt()/7, 400).toFloat()
+        amplitudes.add(norm)
 
-        var left = sw - w
-        var top = 0f
-        var right = left + w
-        var bottom = amp
+        var amps = amplitudes.takeLast(maxSpikes)
+        spikes.clear()
 
-        spikes.add(RectF(left,top,right,bottom))
+        for(i in amps.indices){
+            var left = sw - i*(w+d)
+            var top = sh/2 - amps[i]/2
+            var right = left + w
+            var bottom = top + amps[i]
+            spikes.add(RectF(left,top,right,bottom))
+        }
+
 
         invalidate()
+    }
+
+    fun clear(): ArrayList<Float>{
+        var amps = amplitudes.clone() as ArrayList<Float>
+        amplitudes.clear()
+        spikes.clear()
+        invalidate()
+
+        return amps
     }
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
