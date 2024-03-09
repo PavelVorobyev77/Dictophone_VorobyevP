@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
 import android.os.Handler
@@ -18,11 +19,16 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import androidx.room.Room
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
+import java.io.FileOutputStream
 import java.io.IOException
+import java.io.ObjectOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -48,9 +54,13 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
     private var isRecording = false
     private var isPaused = false
 
+    private var duration = ""
+
     private lateinit var vibrator: Vibrator
 
     private lateinit var timer: Timer
+
+    private lateinit var db: AppDatabase
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
 
@@ -78,6 +88,12 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
             ActivityCompat.requestPermissions(this, permissions, REQUEST_CODE)
         }
 
+        db = Room.databaseBuilder(
+            this,
+            AppDatabase::class.java,
+            "audioRecords"
+        ).build()
+
         bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
         bottomSheetBehavior.peekHeight = 0
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
@@ -96,8 +112,8 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         }
 
         btnList.setOnClickListener{
-            //...
-            Toast.makeText(this, "Это список", Toast.LENGTH_SHORT).show()
+            startActivity(Intent(this, GalleryActivity::class.java))
+
         }
 
         btnDone.setOnClickListener{
@@ -140,6 +156,25 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         if(newFilename != filename){
             var newFile = File("$dirPath$newFilename.mp3")
             File("$dirPath$filename.mp3").renameTo(newFile)
+        }
+
+        var filePath = "$dirPath$newFilename.mp3"
+        var timestamp = Date().time
+        var ampsPath = "$dirPath$newFilename"
+
+        try{
+            var fos = FileOutputStream(ampsPath)
+            var out = ObjectOutputStream(fos)
+            out.writeObject(amplitudes)
+            fos.close()
+            out.close()
+
+        }catch (e:IOException){}
+
+        var record = AudioRecord(newFilename, filePath, timestamp, duration, ampsPath)
+
+        GlobalScope.launch{
+            db.audioRecordDao().insert(record)
         }
     }
     private fun dismiss(){
@@ -245,6 +280,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
 
     override fun onTimerTick(duration: String) {
         tvTimer.text = duration
+        this.duration = duration.dropLast(3)
         waveformView.addAmplitude(recorder.maxAmplitude.toFloat())
     }
 }
