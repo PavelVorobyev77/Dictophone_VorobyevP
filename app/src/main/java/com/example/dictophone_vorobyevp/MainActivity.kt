@@ -234,6 +234,8 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
             setAudioSource(MediaRecorder.AudioSource.MIC)
             setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
             setAudioEncoder(MediaRecorder.AudioEncoder.AAC)
+            recorder.setAudioEncodingBitRate(320000)
+            recorder.setAudioSamplingRate(44100)
             setOutputFile("$dirPath$filename.mp3")
             try {
                 prepare()
