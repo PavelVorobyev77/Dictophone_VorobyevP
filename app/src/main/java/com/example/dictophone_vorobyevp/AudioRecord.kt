@@ -16,5 +16,5 @@ data class AudioRecord (
     @PrimaryKey(autoGenerate = true)
     var id = 0
     @Ignore
-    var isChecked = 0
+    var isChecked = false
 }
