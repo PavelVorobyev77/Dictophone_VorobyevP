@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -150,6 +151,41 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
 
         }
 
+        btnRename.setOnClickListener {
+            val builder = AlertDialog.Builder(this)
+            val dialogView = this.layoutInflater.inflate(R.layout.rename_layout, null)
+            builder.setView(dialogView)
+            val dialog = builder.create()
+
+            val record = records.filter{it.isChecked}.get(0)
+            val textInput = dialogView.findViewById<TextInputEditText>(R.id.filenameInput)
+            textInput.setText(record.filename)
+
+            dialogView.findViewById<Button>(R.id.btnSave).setOnClickListener{
+                val input = textInput.text.toString()
+                if(input.isEmpty()){
+                    Toast.makeText(this, "Назовите запись", Toast.LENGTH_LONG).show()
+                }else{
+                    record.filename = input
+                    GlobalScope.launch {
+                        db.audioRecordDao().update(record)
+                        runOnUiThread{
+                            mAdapter.notifyItemChanged(records.indexOf(record))
+                            dialog.dismiss()
+                            leaveEditMode()
+                        }
+                    }
+                }
+            }
+
+            dialogView.findViewById<Button>(R.id.btnCancel).setOnClickListener{
+                dialog.dismiss()
+            }
+
+            dialog.show()
+
+        }
+
 
     }
 
@@ -159,6 +195,7 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
 
         editBar.visibility = View.GONE
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
         records.map { it.isChecked = false}
         mAdapter.setEditMode(false)
 
