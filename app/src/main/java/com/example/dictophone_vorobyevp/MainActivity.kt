@@ -119,7 +119,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         btnDone.setOnClickListener{
             stopRecorder()
 
-            Toast.makeText(this, "Запись сохранена", Toast.LENGTH_SHORT).show()
+
 
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
             bottomSheetBG.visibility = View.VISIBLE
@@ -129,6 +129,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
         btnOk.setOnClickListener {
             dismiss()
             save()
+            Toast.makeText(this, "Запись сохранена", Toast.LENGTH_SHORT).show()
         }
 
         btnCancel.setOnClickListener {
