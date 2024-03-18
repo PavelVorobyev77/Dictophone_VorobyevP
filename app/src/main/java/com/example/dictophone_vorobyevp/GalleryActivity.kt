@@ -7,13 +7,19 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ImageButton
+import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.room.Delete
 import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -30,6 +36,12 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var editBar: View
     private lateinit var btnClose: ImageButton
     private lateinit var btnSelectAll: ImageButton
+    private lateinit var bottomSheet: LinearLayout
+    private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
+    private lateinit var tvDelete: TextView
+    private lateinit var tvRename: TextView
+    private lateinit var btnDelete: ImageButton
+    private lateinit var btnRename: ImageButton
 
     private var allChecked = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,8 +58,17 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
             onBackPressed()
         }
 
+        btnDelete = findViewById(R.id.btnDelete)
+        btnRename = findViewById(R.id.btnEdit)
+        tvDelete = findViewById(R.id.tvDelete)
+        tvRename = findViewById(R.id.tvEdit)
+
         btnClose = findViewById(R.id.btnClose)
         btnSelectAll = findViewById(R.id.btnSelectAll)
+
+        bottomSheet = findViewById(R.id.bottomSheet)
+        bottomSheetBehavior = BottomSheetBehavior.from(bottomSheet)
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
 
         records = ArrayList()
 
@@ -82,13 +103,7 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         })
 
         btnClose.setOnClickListener{
-            supportActionBar?.setDisplayHomeAsUpEnabled(true)
-            supportActionBar?.setDisplayShowHomeEnabled(true)
-
-            editBar.visibility = View.GONE
-
-            records.map { it.isChecked = false}
-            mAdapter.setEditMode(false)
+            leaveEditMode()
 
         }
 
@@ -97,9 +112,80 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
             records.map{it.isChecked = allChecked}
             mAdapter.notifyDataSetChanged()
 
+            if(allChecked){
+                disableRename()
+                enableDelete()
+            }else{
+                disableDelete()
+                disableRename()
+            }
+
+        }
+
+        btnDelete.setOnClickListener{
+            val builder = AlertDialog.Builder(this)
+            builder.setTitle("Удалить запись?")
+            val nbRecords = records.count{it.isChecked}
+            builder.setMessage("Ты уверен, что хочешь удалить $nbRecords запись(си) ?")
+
+            builder.setPositiveButton("Удалить"){_,_->
+                val toDelete = records.filter{it.isChecked}.toTypedArray()
+                GlobalScope.launch {
+                    db.audioRecordDao().delete(toDelete)
+                    runOnUiThread{
+                        records.removeAll(toDelete)
+                        mAdapter.notifyDataSetChanged()
+                        leaveEditMode()
+                    }
+                }
+
+            }
+
+            builder.setNegativeButton("Отмена"){_,_->
+                //...
+
+            }
+            val dialog = builder.create()
+            dialog.show()
+
         }
 
 
+    }
+
+    private fun leaveEditMode(){
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+        supportActionBar?.setDisplayShowHomeEnabled(true)
+
+        editBar.visibility = View.GONE
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
+        records.map { it.isChecked = false}
+        mAdapter.setEditMode(false)
+
+    }
+
+    private fun disableRename() {
+        btnRename.isClickable = false
+        btnRename.backgroundTintList = ResourcesCompat.getColorStateList(resources, R.color.grayDarkDisabled, theme)
+        tvRename.setTextColor(ResourcesCompat.getColorStateList(resources, R.color.grayDarkDisabled, theme))
+    }
+
+    private fun disableDelete() {
+        btnDelete.isClickable = false
+        btnDelete.backgroundTintList = ResourcesCompat.getColorStateList(resources, R.color.grayDarkDisabled, theme)
+        tvDelete.setTextColor(ResourcesCompat.getColorStateList(resources, R.color.grayDarkDisabled, theme))
+    }
+
+    private fun enableRename() {
+        btnRename.isClickable = true
+        btnRename.backgroundTintList = ResourcesCompat.getColorStateList(resources, R.color.grayDark, theme)
+        tvRename.setTextColor(ResourcesCompat.getColorStateList(resources, R.color.grayDark, theme))
+    }
+
+    private fun enableDelete() {
+        btnDelete.isClickable = true
+        btnDelete.backgroundTintList = ResourcesCompat.getColorStateList(resources, R.color.grayDark, theme)
+        tvDelete.setTextColor(ResourcesCompat.getColorStateList(resources, R.color.grayDark, theme))
     }
 
     private fun searchDatabase(query: String){
@@ -129,6 +215,23 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         if (mAdapter.isEditMode()) {
             records[position].isChecked = !records[position].isChecked
             mAdapter.notifyItemChanged(position)
+
+            var nbSelected = records.count{it.isChecked}
+            when(nbSelected){
+                0 -> {
+                    disableRename()
+                    disableDelete()
+                }
+                1 -> {
+                    enableRename()
+                    enableDelete()
+                }
+                else -> {
+                    disableRename()
+                    enableDelete()
+                }
+            }
+
         } else {
             val intent = Intent(this, AudioPlayerActivity::class.java)
             intent.putExtra("filepath", audioRecord.filePath)
@@ -142,11 +245,16 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         records[position].isChecked = !records[position].isChecked
         mAdapter.notifyItemChanged(position)
 
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
         if (mAdapter.isEditMode() && editBar.visibility == View.GONE){
             supportActionBar?.setDisplayHomeAsUpEnabled(false)
             supportActionBar?.setDisplayShowHomeEnabled(false)
 
             editBar.visibility = View.VISIBLE
+
+            enableDelete()
+            enableRename()
         }
     }
 
