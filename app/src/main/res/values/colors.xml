@@ -12,7 +12,7 @@
 
     <color name="statusColor">#EDEDED</color>
 
-    <color name="strokeColor">#1E88E5</color>
+    <color name="strokeColor">#FF0000</color>  //#1E88E5
 
     <color name="opoqueBG">#61000000</color>
 
