@@ -194,8 +194,8 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         supportActionBar?.setDisplayShowHomeEnabled(true)
 
         editBar.visibility = View.GONE
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
         records.map { it.isChecked = false}
         mAdapter.setEditMode(false)
 
