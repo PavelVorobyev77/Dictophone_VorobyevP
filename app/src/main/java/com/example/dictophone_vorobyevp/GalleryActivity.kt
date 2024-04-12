@@ -13,6 +13,7 @@ import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.FileProvider
 import androidx.core.content.res.ResourcesCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,6 +25,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.textfield.TextInputEditText
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import java.io.File
 
 class GalleryActivity : AppCompatActivity(), OnItemClickListener {
 
@@ -37,6 +39,7 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var editBar: View
     private lateinit var btnClose: ImageButton
     private lateinit var btnSelectAll: ImageButton
+    private lateinit var btnShare: ImageButton
     private lateinit var bottomSheet: LinearLayout
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<LinearLayout>
     private lateinit var tvDelete: TextView
@@ -59,6 +62,7 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
             onBackPressed()
         }
 
+        btnShare = findViewById(R.id.btnShare)
         btnDelete = findViewById(R.id.btnDelete)
         btnRename = findViewById(R.id.btnEdit)
         tvDelete = findViewById(R.id.tvDelete)
@@ -234,6 +238,23 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
             runOnUiThread{
                 mAdapter.notifyDataSetChanged()
             }
+        }
+    }
+
+    private fun shareAudioFile(audioRecord: AudioRecord) {
+        val audioFile = File(audioRecord.filePath)
+
+        if (audioFile.exists()) {
+            val fileUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", audioFile)
+
+            val shareIntent = Intent(Intent.ACTION_SEND)
+            shareIntent.type = "audio/mp3"
+            shareIntent.putExtra(Intent.EXTRA_STREAM, fileUri)
+            shareIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+            startActivity(Intent.createChooser(shareIntent, "Поделиться аудиофайлом через:"))
+        } else {
+            Toast.makeText(this, "Файл не найден", Toast.LENGTH_SHORT).show()
         }
     }
 

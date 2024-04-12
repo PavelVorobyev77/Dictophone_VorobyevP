@@ -7,6 +7,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.media.MediaRecorder
+import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.os.VibrationEffect
@@ -177,6 +178,7 @@ class MainActivity : AppCompatActivity(), Timer.OnTimerTickListener {
             db.audioRecordDao().insert(record)
         }
     }
+
     private fun dismiss(){
         bottomSheetBG.visibility = View.GONE
         hideKeyboard(filenameInput)
