@@ -11,6 +11,12 @@ interface AudioRecordDao {
     @Query("SELECT * FROM audioRecords")
     fun getAll():List<AudioRecord>
 
+    @Query("SELECT * FROM audioRecords ORDER BY filename ASC") // Сортировка по алфавиту (по возрастанию)
+    fun getAllSortedByAlphabet(): List<AudioRecord>
+
+    @Query("SELECT * FROM audioRecords ORDER BY duration ASC") // Сортировка по продолжительности (по возрастанию)
+    fun getAllSortedByDuration(): List<AudioRecord>
+
     @Query("SELECT * FROM audioRecords WHERE filename LIKE :query")
     fun searchDatabase(query: String):List<AudioRecord>
 

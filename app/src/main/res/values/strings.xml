@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">PDict</string>
+    <string name="sort_prompt">Выберите тип сортировки</string>
+
+    <string-array name="sort_options">
+        <item>Не сортировать</item>
+        <item>По алфавиту</item>
+        <item>По продолжительности</item>
+    </string-array>
 </resources>

@@ -52,21 +52,46 @@
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
-        <com.google.android.material.textfield.TextInputLayout
+        <!-- Верхняя панель с элементами -->
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:hintEnabled="false"
-            style = "@style/SearchInputStyle">
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/search_input"
+            android:layout_height="84dp"
+            android:gravity="end"
+            android:orientation="horizontal">
+
+            <!-- Строка поиска -->
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/SearchInputStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="Найти запись"
-                android:inputType="text"
-                android:textColor="@color/colorText"
-                android:textColorHint="@color/grayDark"
-                android:imeOptions="actionSearch"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_marginStart="45dp"
+                app:hintEnabled="false">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/search_input"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="45dp"
+                    android:hint="Найти запись"
+                    android:imeOptions="actionSearch"
+                    android:inputType="text"
+                    android:textColor="@color/colorText"
+                    android:textColorHint="@color/grayDark"
+                    tools:ignore="TouchTargetSizeCheck" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- Выпадающий список для сортировки -->
+            <Spinner
+                android:id="@+id/spinnerSortOptions"
+                android:layout_width="37dp"
+                android:layout_height="53dp"
+                android:layout_marginTop="15dp"
+                android:layout_marginEnd="10dp"
+                android:entries="@array/sort_options"
+                android:prompt="@string/sort_prompt"
+                tools:ignore="TouchTargetSizeCheck" />
+
+        </LinearLayout>
 
 
     </com.google.android.material.appbar.AppBarLayout>

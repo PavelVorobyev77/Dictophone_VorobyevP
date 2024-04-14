@@ -7,9 +7,12 @@ import android.os.Handler
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
+import android.widget.Spinner
 import android.widget.TextView
 import android.widget.Toast
 import android.widget.Toolbar
@@ -47,6 +50,13 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
     private lateinit var tvRename: TextView
     private lateinit var btnDelete: ImageButton
     private lateinit var btnRename: ImageButton
+
+    private enum class SortType {
+        ALPHABET,
+        DURATION
+    }
+
+    private var currentSortType: SortType? = null
 
     private var allChecked = false
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -191,6 +201,36 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
 
         }
 
+        //проклятая сортировка!!!!
+        val spinnerSortOptions = findViewById<Spinner>(R.id.spinnerSortOptions)
+        val adapter = ArrayAdapter.createFromResource(this, R.array.sort_options, android.R.layout.simple_spinner_item).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        }
+        spinnerSortOptions.adapter = adapter
+
+        spinnerSortOptions.setSelection(0) // Выбор "Не сортировать" при старте
+        fetchRecords() // Первичная загрузка записей без сортировки
+        spinnerSortOptions.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                currentSortType = when (position) {
+                    0 -> null
+                    1 -> SortType.ALPHABET
+                    2 -> SortType.DURATION
+                    else -> null
+                }
+                if (currentSortType != null) {
+                    fetchRecords()
+                } else {
+                    fetchRecords()
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {
+                currentSortType = null
+                fetchRecords()
+            }
+        }
+
 
     }
 
@@ -205,7 +245,7 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         val handler = Handler()
         handler.postDelayed({
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-        }, 250) // Пробуйте увеличивать или уменьшать время задержки по необходимости
+        }, 250) // Время задержки
 
         records.map { it.isChecked = false}
         mAdapter.setEditMode(false)
@@ -257,6 +297,31 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
         }
     }
 
+    private fun fetchRecords() {
+        GlobalScope.launch {
+            records.clear()
+            when (currentSortType) {
+                SortType.ALPHABET -> {
+                    val queryResult = db.audioRecordDao().getAllSortedByAlphabet()
+                    records.addAll(queryResult)
+                }
+                SortType.DURATION -> {
+                    val queryResult = db.audioRecordDao().getAllSortedByDuration()
+                    records.addAll(queryResult)
+                }
+                null -> {
+                    val queryResult = db.audioRecordDao().getAll()
+                    records.addAll(queryResult)
+                }
+            }
+
+            runOnUiThread {
+                mAdapter.notifyDataSetChanged()
+            }
+        }
+    }
+
+
     override fun onItemClickListener(position: Int) {
         val audioRecord = records[position]
         if (mAdapter.isEditMode()) {
@@ -285,6 +350,16 @@ class GalleryActivity : AppCompatActivity(), OnItemClickListener {
             intent.putExtra("filename", audioRecord.filename)
             startActivity(intent)
         }
+    }
+
+    private fun sortRecordsByDuration() {
+        records.sortBy { it.duration}
+        mAdapter.notifyDataSetChanged()
+    }
+
+    private fun sortRecordsByAlphabet() {
+        records.sortBy { it.filename }
+        mAdapter.notifyDataSetChanged()
     }
 
     override fun onItemLongClickListener(position: Int) {
