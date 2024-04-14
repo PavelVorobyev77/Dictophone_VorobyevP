@@ -103,13 +103,15 @@ class AudioPlayerActivity : AppCompatActivity() {
         }
 
         speedChip.setOnClickListener{
-            if(playbackSpeed != 2f)
-                playbackSpeed += 0.5f
-            else
-                playbackSpeed = 0.5f
+            if(mediaPlayer.isPlaying) {
+                if (playbackSpeed != 2f)
+                    playbackSpeed += 0.5f
+                else
+                    playbackSpeed = 0.5f
 
-            mediaPlayer.playbackParams = PlaybackParams().setSpeed(playbackSpeed)
-            speedChip.text = "x $playbackSpeed"
+                mediaPlayer.playbackParams = PlaybackParams().setSpeed(playbackSpeed)
+                speedChip.text = "x $playbackSpeed"
+            }
         }
 
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener{
