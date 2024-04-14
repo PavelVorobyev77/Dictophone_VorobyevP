@@ -34,21 +34,40 @@
                 android:paddingEnd="16dp"
                 android:paddingStart="16dp"
                 android:padding="8dp">
-                <ImageButton
-                    android:id="@+id/btnClose"
-                    android:background="@drawable/ic_close"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
 
-                <ImageButton
-                    android:id="@+id/btnSelectAll"
-                    android:background="@drawable/ic_list"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentEnd="true"/>
+                <LinearLayout
+                    android:layout_width="395dp"
+                    android:layout_height="45dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentBottom="true"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginEnd="0dp"
+                    android:layout_marginBottom="8dp"
+                    android:orientation="horizontal">
 
+                    <ImageButton
+                        android:id="@+id/btnClose"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/ic_close"
+                        android:layout_gravity="start"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                    <ImageButton
+                        android:id="@+id/btnSelectAll"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="315dp"
+                        android:background="@drawable/ic_list"
+                        tools:ignore="SpeakableTextPresentCheck,TouchTargetSizeCheck" />
+
+                </LinearLayout>
 
             </RelativeLayout>
+
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
